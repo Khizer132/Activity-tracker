@@ -18,6 +18,7 @@ declare module "next-auth" {
     };
     token: string;
   }
+  
 }
 
 declare module "next-auth/jwt" {
@@ -29,3 +30,4 @@ declare module "next-auth/jwt" {
     token: string;
   }
 }
+

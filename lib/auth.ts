@@ -2,7 +2,6 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { login } from "./api";
 
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
         Credentials({
@@ -50,8 +49,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
 
         // session callback to include user info and token in the session object
+        
         async session({ session, token }) {
             if (session.user) {
+                // @ts-ignore
                 session.user.id = token.id ?? "";
                 session.user.name = token.name ?? "";
                 session.user.email = token.email ?? "";

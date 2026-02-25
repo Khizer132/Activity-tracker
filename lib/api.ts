@@ -61,3 +61,4 @@ export async function getMe(): Promise<MeResponse> {
   const { data } = await api.get<MeResponse>("/api/auth/me");
   return data;
 }
+
