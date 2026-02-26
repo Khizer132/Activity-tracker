@@ -1,27 +1,39 @@
-import { auth } from "@/lib/auth";
-import { RoleGuard } from "@/components/shared/RoleGuard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
 
-export default async function AdminPage() {
-  const session = await auth();
-  const role = session?.user?.role;
+import { useEffect, useState } from "react";
+import type { UserRole } from "@/types";
+import { getMe } from "@/lib/api";
+import { RoleGuard } from "@/components/shared/RoleGuard";
+import { UserTable } from "@/components/admin/UserTable";
+
+export default function AdminUsersPage() {
+  const [role, setRole] = useState<UserRole | undefined>(undefined);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { user } = await getMe();
+        if (!active) return;
+        setRole(user.role);
+      } catch {
+        setRole(undefined);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
-
     <RoleGuard allowedRoles={["admin"]} userRole={role}>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-green-800">Admin</h1>
-        <Card className="border-green-200 bg-white">
-          <CardHeader>
-            <CardTitle>Users and projects</CardTitle>
-          </CardHeader>
-          <CardContent className="text-muted-foreground">
-            Admin-only content
-          </CardContent>
-        </Card>
+        <h1 className="text-2xl font-bold text-green-800">User management</h1>
+        <p className="text-muted-foreground">
+          View users, change roles, and deactivate accounts.
+        </p>
+        <UserTable />
       </div>
     </RoleGuard>
-
-
   );
 }
