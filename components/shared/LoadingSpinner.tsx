@@ -4,10 +4,14 @@ export function LoadingSpinner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "size-8 animate-spin rounded-full border-2 border-muted border-t-primary",
+        "flex min-h-[50vh] w-full items-center justify-center",
         className
       )}
-      aria-label="Loading"
-    />
+    >
+      <div
+        className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary"
+        aria-label="Loading"
+      />
+    </div>
   );
 }

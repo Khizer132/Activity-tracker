@@ -23,7 +23,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "team_lead", "employee"] },
-  { href: "/dashboard/admin", label: "Admin", icon: Users, roles: ["admin"] },
+  { href: "/dashboard/admin", label: "Users", icon: Users, roles: ["admin"] },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban, roles: ["admin", "team_lead", "employee"] },
   { href: "/dashboard/tickets", label: "Tickets", icon: Ticket, roles: ["admin", "team_lead", "employee"] },
 ];

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Ticket, TicketStatus } from "@/types";
-import { getTickets } from "@/lib/api";
+import type { Ticket, TicketStatus, UserRole } from "@/types";
+import { getMe, getTickets, deleteTicket } from "@/lib/api";
 import { TicketCard } from "@/components/tickets/TicketCard";
+import { TicketStageControls } from "@/components/tickets/TicketStageControls";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
 const statusOrder: TicketStatus[] = [
@@ -26,16 +27,19 @@ const statusLabel: Record<TicketStatus, string> = {
 
 export default function TicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [role, setRole] = useState<UserRole | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingTicketId, setDeletingTicketId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const res = await getTickets();
+        const [meRes, ticketsRes] = await Promise.all([getMe(), getTickets()]);
         if (!active) return;
-        setTickets(res.tickets);
+        setRole(meRes.user.role);
+        setTickets(ticketsRes.tickets);
       } catch (err) {
         if (!active) return;
         setError(
@@ -50,8 +54,39 @@ export default function TicketsPage() {
     };
   }, []);
 
+  const handleTicketUpdated = (updated: Ticket) => {
+    setTickets((prev) =>
+      prev.map((t) => (t._id === updated._id ? { ...t, ...updated } : t))
+    );
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (deletingTicketId) return;
+
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this ticket? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    setError(null);
+    setDeletingTicketId(ticketId);
+    try {
+      await deleteTicket(ticketId);
+      setTickets((prev) => prev.filter((t) => t._id !== ticketId));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete ticket."
+      );
+    } finally {
+      setDeletingTicketId(null);
+    }
+  };
+
   if (loading) {
-    return <LoadingSpinner className="mt-8 items-center justify-center" />;
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -63,6 +98,9 @@ export default function TicketsPage() {
     tickets: tickets.filter((t) => t.status === status),
   }));
 
+  const isAdmin = role === "admin";
+  const isEmployee = role === "employee";
+
   return (
     <div className="space-y-6">
       <div>
@@ -72,11 +110,45 @@ export default function TicketsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <style>{`
+        .green-scrollbar {
+          scroll-behavior: smooth;
+        }
+
+        .green-scrollbar::-webkit-scrollbar {
+          height: 4px;
+        }
+
+        .green-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 9999px;
+        }
+
+        .green-scrollbar::-webkit-scrollbar-thumb {
+          background: #86efac;
+          border-radius: 9999px;
+          transition: background 0.3s ease;
+        }
+
+        .green-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #22c55e;
+        }
+
+        .green-scrollbar::-webkit-scrollbar-thumb:active {
+          background: #16a34a;
+        }
+
+        .green-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #86efac transparent;
+        }
+      `}</style>
+
+      <div className="green-scrollbar flex gap-4 overflow-x-auto pb-4">
         {grouped.map(({ status, tickets }) => (
           <div
             key={status}
-            className="space-y-3 rounded-lg border border-green-200 bg-white p-4"
+            className="w-72 shrink-0 space-y-3 rounded-lg border border-green-200 bg-white p-4"
           >
             <h2 className="text-sm font-semibold text-green-800">
               {statusLabel[status]} ({tickets.length})
@@ -88,11 +160,20 @@ export default function TicketsPage() {
             ) : (
               <div className="space-y-3">
                 {tickets.map((ticket) => (
-                  <TicketCard
-                    key={ticket._id}
-                    ticket={ticket}
-                    showProjectName
-                  />
+                  <div key={ticket._id} className="space-y-1">
+                    <TicketCard
+                      ticket={ticket}
+                      showProjectName
+                      canDelete={isAdmin}
+                      onDelete={() => handleDeleteTicket(ticket._id)}
+                    />
+                    {isEmployee && (
+                      <TicketStageControls
+                        ticket={ticket}
+                        onTicketUpdated={handleTicketUpdated}
+                      />
+                    )}
+                  </div>
                 ))}
               </div>
             )}

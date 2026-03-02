@@ -7,11 +7,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// import { LiveTimer } from "@/components/tickets/LiveTimer";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface TicketCardProps {
   ticket: Ticket;
   showProjectName?: boolean;
+  canDelete?: boolean;
+  onDelete?: () => void;
 }
 
 function priorityVariant(priority: TicketPriority): string {
@@ -48,18 +51,27 @@ function statusVariant(status: TicketStatus): string {
   }
 }
 
-export function TicketCard({ ticket, showProjectName }: TicketCardProps) {
+export function TicketCard({
+  ticket,
+  showProjectName,
+  canDelete,
+  onDelete,
+}: TicketCardProps) {
   const projectName =
     typeof ticket.project === "string"
       ? undefined
       : ticket.project.name ?? "Unknown";
 
+  const assigneeName = ticket.assignedTo?.name;
+  const assigneeRole = ticket.assignedTo?.role;
+  const showDelete = Boolean(canDelete && onDelete);
+
   return (
     <Card className="border-green-200 bg-white">
       <CardHeader className="pb-2">
-        <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-sm font-semibold text-green-800">
-          <span className="line-clamp-2">{ticket.title}</span>
-          <div className="flex flex-wrap gap-1">
+        <CardTitle className="flex flex-wrap items-start justify-between gap-2 text-sm font-semibold text-green-800">
+          <span className="line-clamp-2 flex-1">{ticket.title}</span>
+          <div className="flex flex-wrap items-center justify-end gap-1">
             <Badge
               variant="outline"
               className={`capitalize border ${statusVariant(ticket.status)}`}
@@ -68,12 +80,21 @@ export function TicketCard({ ticket, showProjectName }: TicketCardProps) {
             </Badge>
             <Badge
               variant="outline"
-              className={`capitalize border ${priorityVariant(
-                ticket.priority
-              )}`}
+              className={`capitalize border ${priorityVariant(ticket.priority)}`}
             >
               {ticket.priority}
             </Badge>
+            {showDelete && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-6 w-6 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                onClick={onDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         </CardTitle>
       </CardHeader>
@@ -86,7 +107,29 @@ export function TicketCard({ ticket, showProjectName }: TicketCardProps) {
             </span>
           </p>
         )}
-        <p className="line-clamp-3">{ticket.description || "No description."}</p>
+
+        {assigneeName ? (
+          <p className="text-xs">
+            Assigned to:{" "}
+            <span className="font-medium text-green-800">
+              {assigneeName}
+            </span>
+            {assigneeRole && (
+              <span className="text-[11px] text-muted-foreground">
+                {" "}
+                ({assigneeRole.replace("_", " ")})
+              </span>
+            )}
+          </p>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">
+            Not yet assigned to any member.
+          </p>
+        )}
+
+        <p className="line-clamp-3">
+          {ticket.description || "No description."}
+        </p>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span>
             Created:{" "}
@@ -94,13 +137,6 @@ export function TicketCard({ ticket, showProjectName }: TicketCardProps) {
               {formatDateTime(ticket.createdAt)}
             </span>
           </span>
-          {/* {ticket.acceptedAt && (
-            <LiveTimer
-              acceptedAt={ticket.acceptedAt}
-              submittedAt={ticket.submittedAt ?? undefined}
-              status={ticket.status}
-            />
-          )} */}
         </div>
       </CardContent>
     </Card>
