@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,9 +49,10 @@ export function LoginForm() {
       redirect: false,
     });
     if (res?.error) {
-      setError("Invalid email or password.");
+      toast.error("Sign in failed", { description: "Invalid email or password." });
       return;
     }
+    toast.success("Signed in successfully");
     router.push("/dashboard");
     router.refresh();
   }

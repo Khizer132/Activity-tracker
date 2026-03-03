@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { register as registerApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,10 @@ export function RegisterForm() {
         redirect: false,
       });
       if (res?.error) {
-        setError("Account created. Please sign in.");
+        toast.error("Registration failed");
         return;
       }
+      toast.success("Registered successfully");
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
