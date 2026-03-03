@@ -31,40 +31,34 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const membersCount = project.assignedEmployees?.length ?? 0;
 
   return (
-    <Card className="flex h-full flex-col border-green-200 bg-white">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base font-semibold text-green-800">
-            {project.name}
-          </CardTitle>
-          <Badge
-            variant="outline"
-            className={`capitalize border ${statusVariant(project.status)}`}
-          >
-            {project.status.replace("_", " ")}
-          </Badge>
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Created {formatDate(project.createdAt)}
-        </p>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col justify-between gap-3 text-sm">
-        <p className="line-clamp-3 text-muted-foreground">
-          {project.description || "No description provided."}
-        </p>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Members: {membersCount}</span>
-          <span>Tickets: {ticketsCount}</span>
-        </div>
-        <div className="mt-2 flex justify-end">
-          <Link
-            href={`/dashboard/projects/${project._id}`}
-            className="text-xs font-medium text-green-700 underline-offset-2 hover:underline"
-          >
-            View details
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+    <Link href={`/dashboard/projects/${project._id}`} className="group block h-full">
+      <Card className="flex h-full flex-col border-green-200 bg-white transition-shadow group-hover:shadow-md group-hover:border-green-400 cursor-pointer">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-base font-semibold text-green-800">
+              {project.name}
+            </CardTitle>
+            <Badge
+              variant="outline"
+              className={`capitalize border ${statusVariant(project.status)}`}
+            >
+              {project.status.replace("_", " ")}
+            </Badge>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Created {formatDate(project.createdAt)}
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col justify-between gap-3 text-sm">
+          <p className="line-clamp-3 text-muted-foreground">
+            {project.description || "No description provided."}
+          </p>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Members: {membersCount}</span>
+            <span>Tickets: {ticketsCount}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

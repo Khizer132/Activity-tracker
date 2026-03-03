@@ -39,7 +39,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <StatsCards />
+      {role === "admin" && <StatsCards />}
       <RecentActivity />
     </div>
   );

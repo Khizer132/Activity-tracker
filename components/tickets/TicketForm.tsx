@@ -26,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// zod sxhema to
 const baseSchema = z.object({
   title: z
     .string()
